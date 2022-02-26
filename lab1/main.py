@@ -5,7 +5,7 @@ import time
 import argparse
 
 from multiprocessing import Process
-from sorting import quick_sort, merge_sort_p
+from sorting import quick_sort, merge_sort
 from hashgen import generate_hashes
 
 sys.setrecursionlimit(100000)
@@ -68,7 +68,7 @@ def main():
     print('Running...')
     proc_qsort = Process(target=run, args=(quick_sort, hashes,
                                            args.out_path + '/quicksort.txt', args.out_path + '/quicksort_rev.txt'))
-    proc_msort = Process(target=run, args=(merge_sort_p, hashes,
+    proc_msort = Process(target=run, args=(merge_sort, hashes,
                                            args.out_path + '/mergesort.txt', args.out_path + '/mergesort_rev.txt'))
     proc_qsort.start()
     proc_msort.start()

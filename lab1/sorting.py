@@ -1,49 +1,68 @@
 #!/usr/bin/env python3
-
-def merge_sort_p(arr, key=lambda x: x, reverse=False):
-    arr_srt = merge_sort(arr, key, reverse)
-    while arr:
-        arr.pop()
-    arr += arr_srt
+from random import randint
 
 
-def merge_sort(arr, key=lambda x: x, reverse=False):
+def merge_sort(arr, key=lambda x: x, reverse=False, start=0, end=None):
     if len(arr) <= 1:
-        return arr
-    half_size = len(arr) // 2
-    left = merge_sort(arr[:half_size], key, reverse)
-    right = merge_sort(arr[half_size:], key, reverse)
-    return merge(left, right, key, reverse)
+        return
+    if end is None:
+        end = len(arr)
+    if start < end:
+        half_size = (start + end) // 2
+        merge_sort(arr, key, reverse, start, half_size)
+        merge_sort(arr, key, reverse, half_size+1, end)
+        merge(arr, key, reverse, start, half_size+1, end)
 
 
-def merge(left, right, key, reverse):
-    res = list()
-    while left and right:
-        if (key(left[0]) <= key(right[0])) ^ reverse:
-            res.append(left.pop(0))
+def merge(arr, key, reverse, start, mid, end):
+    left = arr[start:mid]
+    right = arr[mid:end+1]
+    i = 0
+    j = 0
+    while i < len(left) or j < len(right):
+        if i < len(left) and j < len(right):
+            if (key(left[i]) <= key(right[j])) ^ reverse:
+                arr[start + i+j] = left[i]
+                i += 1
+            else:
+                arr[start + i+j] = right[j]
+                j += 1
+        elif i < len(left):
+            arr[start + i+j] = left[i]
+            i += 1
         else:
-            res.append(right.pop(0))
-    res += left
-    res += right
-    return res
+            arr[start + i+j] = right[j]
+            j += 1
 
 
 def quick_sort(arr, key=lambda x: x, reverse=False, start=0, end=None):
     if end is None:
-        end = len(arr) - 1
+        end = len(arr)
     if start < end:
-        p = partition(arr, key, reverse, start, end)
-        quick_sort(arr, key, reverse, start, p-1)
-        quick_sort(arr, key, reverse, p+1, end)
+        p1, p2 = partition(arr, key, reverse, start, end)
+        quick_sort(arr, key, reverse, start, p1)
+        quick_sort(arr, key, reverse, p2, end)
 
 
 def partition(arr, key, reverse, start, end):
-    pivot = key(arr[end])
-    i = start - 1
-    for j in range(start, end):
-        if (key(arr[j]) <= pivot) ^ reverse:
-            i += 1
-            arr[i], arr[j] = arr[j], arr[i]
-    i += 1
-    arr[i], arr[end] = arr[end], arr[i]
-    return i
+    rand = randint(start, end-1)
+    pivot = key(arr[rand])
+    left = list()
+    eq = list()
+    right = list()
+    for i in range(start, end):
+        if key(arr[i]) == pivot:
+            eq.append(arr[i])
+        elif (key(arr[i]) < pivot) ^ reverse:
+            left.append(arr[i])
+        else:
+            right.append(arr[i])
+    l1 = len(left)
+    l2 = l1 + len(eq)
+    for i in range(len(left)):
+        arr[start + i] = left[i]
+    for i in range(len(eq)):
+        arr[start + l1 + i] = eq[i]
+    for i in range(len(right)):
+        arr[start + l2 + i] = right[i]
+    return start + l1, start + l2
