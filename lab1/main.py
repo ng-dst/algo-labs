@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 import time
 import argparse
@@ -7,6 +7,8 @@ import argparse
 from multiprocessing import Process
 from sorting import quick_sort, merge_sort_p
 from hashgen import generate_hashes
+
+sys.setrecursionlimit(100000)
 
 
 def key(sha_hash):
@@ -20,12 +22,18 @@ def run(func, hashes, file_dst, file_dst_rev):
     hashes_2 = hashes[:]
 
     func(hashes_1, key)
-    with open(file_dst, 'w') as f:
-        f.writelines(hashes_1)
+    try:
+        with open(file_dst, 'w') as f:
+            f.writelines(hashes_1)
+    except IOError as e:
+        print(f"Thread {func.__name__}: error writing to {file_dst}: {e.strerror}")
 
     func(hashes_2, key, reverse=True)
-    with open(file_dst_rev, 'w') as f:
-        f.writelines(hashes_2)
+    try:
+        with open(file_dst_rev, 'w') as f:
+            f.writelines(hashes_2)
+    except IOError as e:
+        print(f"Thread {func.__name__}: error writing to {file_dst_rev}: {e.strerror}")
 
     total_time = time.thread_time() - init_time
     print(f'Thread {func.__name__}: finished in {total_time} s')
@@ -46,8 +54,15 @@ def main():
         hashes = generate_hashes(args.generate)
         args.input = "generator"
     else:
-        with open(args.input) as f:
-            hashes = f.readlines()
+        try:
+            with open(args.input) as f:
+                hashes = f.readlines()
+        except IOError as e:
+            print(f"File {args.input} not found: {e.strerror}")
+            sys.exit(1)
+
+    if not os.path.exists(args.out_path + "/"):
+        os.mkdir(args.out_path)
 
     print(f'Read {len(hashes)} hashes from {args.input}.')
     print('Running...')
@@ -60,8 +75,6 @@ def main():
 
     proc_qsort.join()
     proc_msort.join()
-
-    print('Done!')
 
 
 if __name__ == '__main__':
