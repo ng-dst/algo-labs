@@ -36,17 +36,20 @@ def pollard_rho(n):
         return n
     if n % 2 == 0:
         return 2
-    i = 1
     x = random.randint(0, n-1)
     y = x
     k = 2
     cycle = set()
+    count = 0
+    i = 0
     while True:
+        count += 1
         i += 1
         if x in cycle:
             return n
-        else:
+        elif count == 65537:
             cycle.add(x)
+            count = 0
         x = (x**2 - 1) % n
         d = gcd(y - x, n)
         if d != 1 and d != n:
